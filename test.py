@@ -1,3 +1,3 @@
-def test():
-   assert 1 + 1 == 2
-test()
+def test_addition():
+   result = 1 + 1
+   assert result == 2
