@@ -1,53 +1,46 @@
 pipeline {
    agent any
+   environment {
+       IMAGE_NAME = "vigno1995/myapp"
+   }
    stages {
        stage('Checkout') {
            steps {
                git branch: 'main', url: 'https://github.com/akshayakannan0503-arch/demo-devops-app.git'
            }
        }
-       stage('Build') {
+       stage('Test') {
            steps {
-               sh 'mvn clean install'
+               sh 'python3 test.py'
            }
        }
-       stage('SonarCloud Analysis') {
+       stage('Run App') {
            steps {
-               withCredentials([string(credentialsId: 'sonar-token', variable: 'TOKEN')]) {
-                   sh '''
-                   mvn sonar:sonar \
-                   -Dsonar.projectKey=demo-devops-app \
-                   -Dsonar.organization=akshayakannan0503-arch \
-                   -Dsonar.host.url=https://sonarcloud.io \
-                   -Dsonar.login=$TOKEN
-                   '''
-               }
+               sh 'python3 app.py'
            }
        }
        stage('Docker Build') {
            steps {
-               sh 'docker build -t vigno1995/myapp .'
+               sh 'docker build -t $IMAGE_NAME .'
            }
        }
        stage('Docker Push') {
            steps {
                withCredentials([usernamePassword(
-                   credentialsId: 'dockerhub',
+                   credentialsId: 'dockerhub-cred',
                    usernameVariable: 'USER',
-                   passwordVariable: 'PASS')]) {
+                   passwordVariable: 'PASS'
+               )]) {
                    sh '''
                    echo $PASS | docker login -u $USER --password-stdin
-                   docker push vigno1995/myapp
+                   docker push $IMAGE_NAME
                    '''
                }
            }
        }
        stage('Deploy') {
            steps {
-               sh '''
-               docker rm -f myapp || true
-               docker run -d --name myapp -p 8080:80 vigno1995/myapp
-               '''
+               sh 'docker run -d -p 80:80 $IMAGE_NAME'
            }
        }
    }
