@@ -3,7 +3,7 @@ pipeline {
    stages {
        stage('Checkout') {
            steps {
-               git 'https://github.com/akshayakannan0503-arch/demo-devops-app.git'
+               git branch: 'main', url: 'https://github.com/akshayakannan0503-arch/demo-devops-app.git'
            }
        }
        stage('Build') {
