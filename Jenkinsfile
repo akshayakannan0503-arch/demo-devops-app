@@ -1,8 +1,5 @@
 pipeline {
    agent any
-   tools {
-       maven 'Maven'
-   }
    stages {
        stage('Checkout') {
            steps {
@@ -11,7 +8,7 @@ pipeline {
        }
        stage('Build') {
            steps {
-               sh 'echo "Build successful"'
+               sh 'mvn clean install'
            }
        }
        stage('SonarCloud Analysis') {
@@ -49,7 +46,7 @@ pipeline {
            steps {
                sh '''
                docker rm -f myapp || true
-               docker run -d --name myapp -p 80:80 vigno1995/myapp
+               docker run -d --name myapp -p 8080:80 vigno1995/myapp
                '''
            }
        }
